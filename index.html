@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <base target="_top">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>建物地址查詢</title>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #075eab;
+      --primary-dark: #034a88;
+      --primary-light: #eaf4fc;
+
+      --line-green: #06c755;
+      --line-green-dark: #05a847;
+
+      --background: #f5f7fa;
+      --card: #ffffff;
+
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+
+      --success: #15803d;
+      --danger: #dc2626;
+
+      --shadow:
+        0 10px 30px rgba(31, 41, 55, 0.08);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Microsoft JhengHei",
+        "Noto Sans TC",
+        sans-serif;
+
+      background: var(--background);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+
+    /* ============================
+       HERO
+    ============================ */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+
+      background:
+        linear-gradient(
+          135deg,
+          #034a88 0%,
+          #075eab 55%,
+          #167cc1 100%
+        );
+
+      color: #ffffff;
+
+      padding:
+        58px 20px
+        92px;
+    }
+
+    .hero::before {
+      content: "";
+
+      position: absolute;
+
+      width: 360px;
+      height: 360px;
+
+      right: -130px;
+      top: -170px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .hero::after {
+      content: "";
+
+      position: absolute;
+
+      width: 220px;
+      height: 220px;
+
+      left: -100px;
+      bottom: -150px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-content {
+      position: relative;
+
+      max-width: 900px;
+
+      margin: 0 auto;
+
+      text-align: center;
+
+      z-index: 1;
+    }
+
+    .brand-icon {
+      width: 58px;
+      height: 58px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      margin:
+        0 auto
+        18px;
+
+      border-radius: 16px;
+
+      background:
+        rgba(255, 255, 255, 0.14);
+
+      border:
+        1px solid
+        rgba(255, 255, 255, 0.22);
+    }
+
+    .brand-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .hero h1 {
+      margin: 0;
+
+      font-size: 32px;
+      font-weight: 700;
+
+      letter-spacing: 1px;
+    }
+
+    .hero p {
+      margin:
+        12px auto
+        0;
+
+      max-width: 560px;
+
+      font-size: 15px;
+
+      line-height: 1.7;
+
+      color:
+        rgba(255, 255, 255, 0.84);
+    }
+
+
+    /* ============================
+       LIFF 狀態畫面
+    ============================ */
+
+    .access-area {
+      position: relative;
+
+      max-width: 620px;
+
+      margin:
+        -50px auto
+        0;
+
+      padding:
+        0 20px
+        50px;
+
+      z-index: 3;
+    }
+
+    .access-card {
+      padding: 34px 26px;
+
+      background: #ffffff;
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 18px;
+
+      text-align: center;
+
+      box-shadow: var(--shadow);
+    }
+
+    .access-icon {
+      width: 64px;
+      height: 64px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      margin:
+        0 auto
+        18px;
+
+      border-radius: 50%;
+
+      background: #e9fbf0;
+
+      color: var(--line-green);
+    }
+
+    .access-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .access-title {
+      margin:
+        0 0
+        10px;
+
+      color: #163a5c;
+
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .access-description {
+      margin:
+        0 auto
+        22px;
+
+      max-width: 430px;
+
+      color: var(--muted);
+
+      font-size: 14px;
+
+      line-height: 1.8;
+    }
+
+    .line-button {
+      min-width: 190px;
+      min-height: 48px;
+
+      display: inline-flex;
+
+      gap: 8px;
+
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        0 22px;
+
+      border: 0;
+
+      border-radius: 11px;
+
+      color: #ffffff;
+
+      background: var(--line-green);
+
+      font-size: 15px;
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition:
+        background .2s,
+        transform .1s;
+    }
+
+    .line-button:hover {
+      background: var(--line-green-dark);
+    }
+
+    .line-button:active {
+      transform:
+        translateY(1px);
+    }
+
+    .line-button:disabled {
+      opacity: .65;
+
+      cursor: not-allowed;
+    }
+
+    .retry-button {
+      min-width: 160px;
+      min-height: 46px;
+
+      display: inline-flex;
+
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        0 20px;
+
+      border:
+        1px solid #d8e9f8;
+
+      border-radius: 11px;
+
+      color: var(--primary);
+
+      background: #f5faff;
+
+      font-size: 15px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .retry-button:hover {
+      background: var(--primary-light);
+    }
+
+    .access-message {
+      min-height: 22px;
+
+      margin-top: 14px;
+
+      color: var(--muted);
+
+      font-size: 13px;
+
+      line-height: 1.6;
+    }
+
+    .access-message.error {
+      color: var(--danger);
+    }
+
+    .initial-loading {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 14px;
+
+      align-items: center;
+      justify-content: center;
+    }
+
+
+    /* ============================
+       MAIN
+    ============================ */
+
+    .main {
+      position: relative;
+
+      max-width: 900px;
+
+      margin:
+        -50px auto
+        0;
+
+      padding:
+        0 20px
+        50px;
+
+      z-index: 2;
+    }
+
+
+    /* ============================
+       SEARCH CARD
+    ============================ */
+
+    .search-card {
+      background: var(--card);
+
+      padding: 26px;
+
+      border-radius: 18px;
+
+      box-shadow: var(--shadow);
+    }
+
+    .search-label {
+      display: block;
+
+      margin-bottom: 10px;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      color: #374151;
+    }
+
+    .search-row {
+      display: flex;
+
+      gap: 10px;
+    }
+
+    .input-wrap {
+      position: relative;
+
+      flex: 1;
+    }
+
+    .input-icon {
+      position: absolute;
+
+      left: 16px;
+      top: 50%;
+
+      width: 20px;
+      height: 20px;
+
+      transform:
+        translateY(-50%);
+
+      color: #9ca3af;
+
+      pointer-events: none;
+    }
+
+    #keyword {
+      width: 100%;
+      height: 52px;
+
+      padding:
+        0 16px
+        0 48px;
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 11px;
+
+      background: #ffffff;
+
+      color: var(--text);
+
+      font-size: 16px;
+
+      outline: none;
+
+      transition:
+        border-color .2s,
+        box-shadow .2s;
+    }
+
+    #keyword::placeholder {
+      color: #9ca3af;
+    }
+
+    #keyword:focus {
+      border-color: var(--primary);
+
+      box-shadow:
+        0 0 0 4px
+        rgba(7, 94, 171, 0.10);
+    }
+
+    #searchButton {
+      min-width: 118px;
+      height: 52px;
+
+      display: flex;
+
+      gap: 8px;
+
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        0 22px;
+
+      border: 0;
+
+      border-radius: 11px;
+
+      background: var(--primary);
+
+      color: #ffffff;
+
+      font-size: 15px;
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition:
+        background .2s,
+        transform .1s;
+    }
+
+    #searchButton:hover {
+      background: var(--primary-dark);
+    }
+
+    #searchButton:active {
+      transform:
+        translateY(1px);
+    }
+
+    #searchButton:disabled {
+      opacity: .65;
+
+      cursor: not-allowed;
+    }
+
+    #searchButton svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .search-hint {
+      margin-top: 12px;
+
+      font-size: 13px;
+
+      color: var(--muted);
+    }
+
+
+    /* ============================
+       STATUS
+    ============================ */
+
+    #status {
+      min-height: 24px;
+
+      margin:
+        24px 2px
+        10px;
+
+      font-size: 14px;
+
+      color: var(--muted);
+    }
+
+    .status-success {
+      color:
+        var(--success) !important;
+    }
+
+    .status-error {
+      color:
+        var(--danger) !important;
+    }
+
+
+    /* ============================
+       LOADING
+    ============================ */
+
+    .loading {
+      display: flex;
+
+      gap: 10px;
+
+      align-items: center;
+
+      padding: 26px;
+
+      background: #ffffff;
+
+      border-radius: 14px;
+
+      color: var(--muted);
+
+      box-shadow:
+        0 3px 14px
+        rgba(0, 0, 0, 0.04);
+    }
+
+    .spinner {
+      width: 19px;
+      height: 19px;
+
+      border:
+        2px solid #dbeafe;
+
+      border-top-color:
+        var(--primary);
+
+      border-radius: 50%;
+
+      animation:
+        spin .8s linear infinite;
+    }
+
+    .spinner.line-spinner {
+      width: 26px;
+      height: 26px;
+
+      border-color: #d9f8e5;
+
+      border-top-color: var(--line-green);
+    }
+
+    @keyframes spin {
+      to {
+        transform:
+          rotate(360deg);
+      }
+    }
+
+
+    /* ============================
+       RESULTS
+    ============================ */
+
+    #results {
+      display: grid;
+
+      gap: 14px;
+    }
+
+    .result-card {
+      position: relative;
+
+      overflow: hidden;
+
+      background: var(--card);
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 15px;
+
+      padding:
+        20px 22px;
+
+      box-shadow:
+        0 3px 12px
+        rgba(31, 41, 55, 0.04);
+
+      transition:
+        transform .2s,
+        box-shadow .2s,
+        border-color .2s;
+    }
+
+    .result-card:hover {
+      transform:
+        translateY(-2px);
+
+      border-color: #cbd5e1;
+
+      box-shadow:
+        0 8px 24px
+        rgba(31, 41, 55, 0.08);
+    }
+
+    .result-head {
+      display: flex;
+
+      gap: 16px;
+
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .building-info {
+      min-width: 0;
+
+      flex: 1;
+    }
+
+    .building-name {
+      margin-bottom: 8px;
+
+      color: #163a5c;
+
+      font-size: 19px;
+      font-weight: 700;
+
+      line-height: 1.4;
+    }
+
+
+    /* ============================
+       ADDRESS
+    ============================ */
+
+    .address-row {
+      display: flex;
+
+      gap: 8px;
+
+      align-items: flex-start;
+
+      color: #4b5563;
+
+      line-height: 1.7;
+    }
+
+    .address-icon {
+      display: flex;
+
+      flex:
+        0 0 auto;
+
+      width: 18px;
+      height: 18px;
+
+      margin-top: 4px;
+
+      color: var(--primary);
+    }
+
+    .address-icon svg {
+      display: block;
+
+      width: 18px;
+      height: 18px;
+    }
+
+    .address-link {
+      color: #4b5563;
+
+      text-decoration: none;
+
+      word-break: break-word;
+
+      transition:
+        color .2s;
+    }
+
+    .address-link:hover {
+      color: var(--primary);
+
+      text-decoration: underline;
+    }
+
+    .address-link:focus {
+      color: var(--primary);
+
+      outline:
+        2px solid rgba(7, 94, 171, 0.2);
+
+      outline-offset: 3px;
+
+      border-radius: 3px;
+    }
+
+
+    /* ============================
+       PHONE
+    ============================ */
+
+    .phone-row {
+      display: flex;
+
+      gap: 8px;
+
+      align-items: center;
+
+      margin-top: 6px;
+
+      color: #4b5563;
+
+      line-height: 1.7;
+    }
+
+    .phone-icon {
+      display: flex;
+
+      flex:
+        0 0 auto;
+
+      width: 18px;
+      height: 18px;
+
+      color: var(--primary);
+    }
+
+    .phone-icon svg {
+      display: block;
+
+      width: 18px;
+      height: 18px;
+    }
+
+    .phone-link {
+      color: #4b5563;
+
+      text-decoration: none;
+
+      font-size: 15px;
+
+      transition:
+        color .2s;
+    }
+
+    .phone-link:hover {
+      color: var(--primary);
+
+      text-decoration: underline;
+    }
+
+    .phone-link:focus {
+      color: var(--primary);
+
+      outline:
+        2px solid rgba(7, 94, 171, 0.2);
+
+      outline-offset: 3px;
+
+      border-radius: 3px;
+    }
+
+
+    /* ============================
+       DISTRICT / NOTE
+    ============================ */
+
+    .meta-row {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top: 13px;
+    }
+
+    .district {
+      display: inline-flex;
+
+      align-items: center;
+
+      padding:
+        5px 10px;
+
+      border-radius: 20px;
+
+      background: var(--primary-light);
+
+      color: var(--primary);
+
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .note {
+      margin-top: 12px;
+
+      padding-top: 12px;
+
+      border-top:
+        1px solid #f0f1f3;
+
+      color: var(--muted);
+
+      font-size: 13px;
+
+      line-height: 1.6;
+    }
+
+
+    /* ============================
+       EMPTY
+    ============================ */
+
+    .empty {
+      padding:
+        46px 20px;
+
+      text-align: center;
+
+      background: #ffffff;
+
+      border:
+        1px solid var(--border);
+
+      border-radius: 15px;
+    }
+
+    .empty-icon {
+      width: 55px;
+      height: 55px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      margin:
+        0 auto
+        15px;
+
+      border-radius: 50%;
+
+      color: var(--primary);
+
+      background: var(--primary-light);
+    }
+
+    .empty-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .empty-title {
+      margin-bottom: 7px;
+
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .empty-desc {
+      color: var(--muted);
+
+      font-size: 13px;
+    }
+
+
+    /* ============================
+       FOOTER
+    ============================ */
+
+    .footer {
+      padding:
+        10px 20px
+        30px;
+
+      text-align: center;
+
+      color: #9ca3af;
+
+      font-size: 12px;
+    }
+
+
+    /* ============================
+       MOBILE
+    ============================ */
+
+    @media (max-width: 600px) {
+
+      .hero {
+        padding:
+          42px 18px
+          78px;
+      }
+
+      .hero h1 {
+        font-size: 25px;
+      }
+
+      .hero p {
+        font-size: 14px;
+      }
+
+      .brand-icon {
+        width: 52px;
+        height: 52px;
+      }
+
+      .main,
+      .access-area {
+        margin-top: -42px;
+
+        padding:
+          0 14px
+          35px;
+      }
+
+      .search-card {
+        padding: 18px;
+
+        border-radius: 15px;
+      }
+
+      .access-card {
+        padding:
+          30px 20px;
+
+        border-radius: 15px;
+      }
+
+      .search-row {
+        flex-direction: column;
+      }
+
+      #searchButton {
+        width: 100%;
+      }
+
+      .result-card {
+        padding: 18px;
+      }
+
+      .result-head {
+        flex-direction: column;
+      }
+
+      .line-button,
+      .retry-button {
+        width: 100%;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <!-- ============================
+       HERO
+  ============================= -->
+
+  <header class="hero">
+
+    <div class="hero-content">
+
+      <div class="brand-icon">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path d="M3 21h18"/>
+          <path d="M6 21V7l6-4 6 4v14"/>
+          <path d="M9 10h2"/>
+          <path d="M13 10h2"/>
+          <path d="M9 14h2"/>
+          <path d="M13 14h2"/>
+          <path d="M10 21v-4h4v4"/>
+        </svg>
+
+      </div>
+
+      <h1>建物地址查詢</h1>
+
+      <p>
+        輸入建物名稱、地址或行政區關鍵字，
+        即可快速查詢相關地址資訊。
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- ============================
+       LIFF 初始化中
+  ============================= -->
+
+  <section
+    id="liffLoading"
+    class="access-area"
+  >
+
+    <div class="access-card initial-loading">
+
+      <div class="spinner line-spinner"></div>
+
+      <div class="access-description">
+        正在確認 LINE 使用環境...
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ============================
+       非 LINE 或初始化失敗
+  ============================= -->
+
+  <section
+    id="accessError"
+    class="access-area"
+    style="display:none;"
+  >
+
+    <div class="access-card">
+
+      <div class="access-icon">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 8v5"/>
+          <path d="M12 17h.01"/>
+        </svg>
+
+      </div>
+
+      <h2
+        id="accessErrorTitle"
+        class="access-title"
+      >
+        無法確認 LINE 使用環境
+      </h2>
+
+      <p
+        id="accessErrorDescription"
+        class="access-description"
+      >
+        請從 LINE 重新開啟此服務。
+      </p>
+
+      <button
+        id="retryButton"
+        class="retry-button"
+        type="button"
+      >
+        重新確認
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ============================
+       MAIN
+  ============================= -->
+
+  <main
+    id="mainContent"
+    class="main"
+    style="display:none;"
+  >
+
+    <section class="search-card">
+
+      <label
+        class="search-label"
+        for="keyword"
+      >
+        查詢關鍵字
+      </label>
+
+
+      <div class="search-row">
+
+        <div class="input-wrap">
+
+          <svg
+            class="input-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+
+
+          <input
+            id="keyword"
+            type="text"
+            placeholder="例如：台北、信義、101"
+            autocomplete="off"
+            aria-label="建物搜尋關鍵字"
+          >
+
+        </div>
+
+
+        <button
+          id="searchButton"
+          type="button"
+          onclick="search()"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+
+          查詢
+
+        </button>
+
+      </div>
+
+
+      <div class="search-hint">
+        請至少輸入 2 個字元，例如「板橋」、「中山路」或建物名稱。
+      </div>
+
+    </section>
+
+
+    <div
+      id="status"
+      aria-live="polite"
+    ></div>
+
+
+    <section id="results"></section>
+
+  </main>
+
+
+  <footer
+    id="pageFooter"
+    class="footer"
+    style="display:none;"
+  >
+    建物地址查詢服務
+  </footer>
+
+
+<script>
+  /* ============================
+     LIFF 設定
+  ============================ */
+
+  const LIFF_ID = '2007329748-JdexWGRz';
+  let accessVerified = false;
+
+  /* ============================
+     畫面元素
+  ============================ */
+
+  const liffLoading = document.getElementById('liffLoading');
+  const accessError = document.getElementById('accessError');
+  const mainContent = document.getElementById('mainContent');
+  const pageFooter = document.getElementById('pageFooter');
+  const retryButton = document.getElementById('retryButton');
+  const accessErrorTitle = document.getElementById('accessErrorTitle');
+  const accessErrorDescription = document.getElementById('accessErrorDescription');
+
+  /* ============================
+     畫面切換
+  ============================ */
+
+  function hideAllScreens() {
+    liffLoading.style.display = 'none';
+    accessError.style.display = 'none';
+    mainContent.style.display = 'none';
+    pageFooter.style.display = 'none';
+  }
+
+  function showLoadingScreen() {
+    hideAllScreens();
+    liffLoading.style.display = 'block';
+  }
+
+  function showMainContent() {
+    hideAllScreens();
+    accessVerified = true;
+    mainContent.style.display = 'block';
+    pageFooter.style.display = 'block';
+  }
+
+  function showAccessError(title, description) {
+    hideAllScreens();
+    accessVerified = false;
+    accessErrorTitle.textContent = title;
+    accessErrorDescription.textContent = description;
+    accessError.style.display = 'block';
+    pageFooter.style.display = 'block';
+  }
+
+  /* ============================
+     LIFF 初始化與環境驗證
+  ============================ */
+
+  async function initializeLiff() {
+    try {
+      showLoadingScreen();
+
+      if (typeof liff === 'undefined') {
+        throw new Error('LIFF SDK 未載入');
+      }
+
+      await liff.init({
+        liffId: LIFF_ID
+      });
+
+      const isInClient = liff.isInClient();
+      const isLoggedIn = liff.isLoggedIn();
+
+      console.log('[LIFF] 初始化成功');
+      console.log('[LIFF] isInClient =', isInClient);
+      console.log('[LIFF] isLoggedIn =', isLoggedIn);
+
+      if (!isInClient) {
+        showAccessError(
+          '請從 LINE 開啟',
+          '此服務僅提供從 LINE App 內開啟使用，請回到 LINE 後重新開啟 LIFF 連結。'
+        );
+        return;
+      }
+
+      if (!isLoggedIn) {
+        liff.login();
+        return;
+      }
+
+      showMainContent();
+
+    } catch (error) {
+      console.error('[LIFF] 初始化失敗：', error);
+
+      const errorMessage = error && error.message
+        ? error.message
+        : String(error);
+
+      showAccessError(
+        '無法啟動 LINE 驗證',
+        'LIFF 初始化失敗：' + errorMessage
+      );
+    }
+  }
+
+  retryButton.addEventListener('click', initializeLiff);
+
+  /* ============================
+     查詢畫面元素
+  ============================ */
+
+  const keywordInput = document.getElementById('keyword');
+  const searchButton = document.getElementById('searchButton');
+  const statusElement = document.getElementById('status');
+  const resultsElement = document.getElementById('results');
+
+  keywordInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      search();
+    }
+  });
+
+  /* ============================
+     查詢
+
+     注意：目前此檔案放在 GitHub Pages 時，
+     google.script.run 無法使用。
+     下方先保留畫面與驗證流程，查詢 API
+     後續需改為 fetch() 呼叫 Apps Script。
+  ============================ */
+
+  function search() {
+    if (!accessVerified) {
+      statusElement.textContent = '請從 LINE 內重新開啟此服務。';
+      statusElement.className = 'status-error';
+      return;
+    }
+
+    const keyword = keywordInput.value.trim();
+    statusElement.className = '';
+
+    if (keyword.length < 2) {
+      statusElement.textContent = '請至少輸入 2 個字元。';
+      statusElement.className = 'status-error';
+      resultsElement.innerHTML = '';
+      keywordInput.focus();
+      return;
+    }
+
+    statusElement.textContent =
+      'LINE 使用環境驗證已通過。查詢 API 尚未切換為 GitHub Pages 可用的 fetch()。';
+    statusElement.className = 'status-error';
+  }
+
+  /* ============================
+     啟動 LIFF
+  ============================ */
+
+  initializeLiff();
+</script>
+
+</body>
+</html>
